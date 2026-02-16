@@ -1,18 +1,73 @@
-## Getting Started
+# Java 2D Physics Engine
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+A 2D rigid body physics engine built from scratch in Java using Swing. Supports circles and rotatable rectangles with realistic collision detection and response.
 
-## Folder Structure
+## Features
 
-The workspace contains two folders by default, where:
+- **Circle rigid bodies** with configurable radius and mass
+- **Rotatable rectangle rigid bodies** with configurable width, height, and angle
+- **Circle-circle collision** with impulse-based response and positional correction
+- **Rectangle-rectangle collision** using the Separating Axis Theorem (SAT)
+- **Circle-rectangle collision** using local space transformation
+- **Gravity simulation** for all bodies
+- **Wall collision** for all shapes
+- **Interactive spawning** — click anywhere to spawn shapes
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+## Controls
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+| Input | Action |
+|-------|--------|
+| `Click` | Spawn a shape at cursor position |
+| `C` | Switch to circle spawn mode |
+| `R` | Switch to rectangle spawn mode |
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+## How It Works
 
-## Dependency Management
+### Circle-Circle Collision
+Uses impulse-based collision response with positional correction to prevent sinking. Collision normal is calculated from the vector between centers.
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+### Rectangle-Rectangle Collision (SAT)
+The Separating Axis Theorem projects both rectangles onto 4 axes (2 per rectangle) and checks for overlap. If any axis shows no overlap, the shapes are not colliding.
+
+### Circle-Rectangle Collision
+Transforms the circle's position into the rectangle's local coordinate space using the rectangle's rotation axes (basis vectors). Performs an axis-aligned closest point check in local space, then transforms the result back to world space.
+
+### Rotation
+Rectangle corners are calculated using a rotated basis derived from the rectangle's angle:
+```
+axis1 = (cos θ, sin θ)   // along width
+axis2 = (-sin θ, cos θ)  // along height
+```
+Each corner is expressed as a linear combination of these basis vectors — directly applying the 2D rotation matrix.
+
+## How to Run
+
+### Prerequisites
+- Java JDK 8 or higher
+
+### Running
+```bash
+javac *.java
+java App
+```
+
+## Project Structure
+
+```
+├── App.java          # Entry point, creates JFrame window
+├── GamePanel.java    # Main panel, game loop, collision detection
+├── RigidBody.java    # Base class with position, velocity, mass
+├── Circle.java       # Extends RigidBody, adds radius
+└── Rectangle.java    # Extends RigidBody, adds width, height, angle, SAT
+```
+
+## What I Learned
+
+Built as a project to learn Java coming from a C background. Key concepts covered:
+
+- Java OOP — classes, inheritance, constructors
+- Swing graphics and game loop using javax.swing.Timer
+- 2D physics — impulse response, positional correction, tunneling prevention
+- Linear algebra applied to graphics — rotation matrices, basis vectors, dot products, projections
+- Separating Axis Theorem for convex shape collision detection
+- Coordinate space transformations (local space vs world space)
